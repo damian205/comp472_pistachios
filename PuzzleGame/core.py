@@ -13,11 +13,22 @@ def main():
             for children in root_node.list_of_children:
                 print(children)
                 print("''''''''")
+                saveFile = open('savedOutput.txt','w')
+                saveFile.write(np.array_str(children.game_board))
+                saveFile.close()
+#                t_matrix=map(list, zip(*np.array_str(children.game_board)))
+#                print (t_matrix)
+                
+#                for row in np.array_str(children.game_board): 
+#                    print (row)
+#                    
+            
 
 
 def start_dfs(node, max_depth):
     visited = []
     print(dfs(node, visited, int(max_depth)))
+   
 
 
 def dfs(node, visited_nodes, max_depth):
