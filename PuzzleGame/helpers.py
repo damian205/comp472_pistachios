@@ -9,6 +9,7 @@ class Node:
         self.game_board = game_board
         self.list_of_children = []
         self.depth = parent_depth + 1
+        self.str_id = ''
 
     def add_child(self, game_board):
         self.list_of_children.append(game_board)
@@ -27,6 +28,12 @@ def build_initial_board(dimension, values):
         board.append(separated_row)
     return board
 
+def get_id(game_board):
+    str_id = ''
+    for row in game_board:
+        for el in row:
+            str_id = str_id + str(el)   
+    return str_id  
 
 # Function that will build all the possible variations of a parent game board after exactly one index has been flipped
 # each board generated is then stored as a child to the parent node that contains the parent board
@@ -37,7 +44,7 @@ def build_boards(parent_node):
         flip(index[0], index[1], child_board)
         child_node = Node(child_board, parent_node.depth)
         parent_node.add_child(child_node)
-
+    return parent_node.list_of_children
 
 def find_best_board(parent_node):
     best_child = None
