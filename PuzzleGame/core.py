@@ -8,11 +8,12 @@ def main():
             puzzle_dimension, max_depth, max_search_path, values = line.split()
             root_board = np.array(build_initial_board(int(puzzle_dimension), values), np.int32)
             root_node = Node(root_board, 0)
-            # start_dfs(root_node, max_depth)
-            build_boards(root_node)
-            for children in root_node.list_of_children:
-                print(children)
-                print("''''''''")
+            start_dfs(root_node, max_depth)
+            # print("".join(str(number) for number in root_node.game_board.flatten()))
+            # build_boards(root_node)
+            # for children in root_node.list_of_children:
+            #     print(children)
+            #     print("''''''''")
 
 
 def start_dfs(node, max_depth):
@@ -20,42 +21,66 @@ def start_dfs(node, max_depth):
     print(dfs(node, visited, int(max_depth)))
 
 
+# def dfs(node, visited_nodes, max_depth):
+#     # print("''''''''")
+#     # print("Node that has been visited")
+#     # print(node.game_board)
+#     # print("''''''''")
+#     # board_as_single_string = "".join(str(number) for number in node.game_board.flatten())
+#     if node in visited_nodes:
+#         return False
+#     visited_nodes.append(node)
+#     # print(visited_nodes)
+#     if is_all_zeros(node.game_board):
+#         print('Winner')
+#         print("'''''''")
+#         print(node.game_board)
+#         print("'''''''")
+#         return True
+#     if node.depth == max_depth:
+#         return False
+#     build_boards(node)
+#     for child in node.list_of_children:
+#         if dfs(child, visited_nodes, max_depth) is True:
+#             print("'''''''")
+#             print(node.game_board)
+#             print("'''''''")
+#             return True
+#     return False
+
+
 def dfs(node, visited_nodes, max_depth):
-    if node in visited_nodes:
+    # print("''''''''")
+    # print("Node that has been visited")
+    # print(node.game_board)
+    # print("''''''''")
+    board_as_single_string = "".join(str(number) for number in node.game_board.flatten())
+    if len(set(board_as_single_string).intersection(set(visited_nodes))) != 0:
         return False
-    visited_nodes.append(node)
+    # if board_as_single_string in visited_nodes:
+    #     return False
+    visited_nodes.append(board_as_single_string)
+    # print(visited_nodes)
     if is_all_zeros(node.game_board):
+        print('Winner')
+        print("'''''''")
+        print(node.game_board)
+        print("'''''''")
         return True
     if node.depth == max_depth:
         return False
     build_boards(node)
     for child in node.list_of_children:
         if dfs(child, visited_nodes, max_depth) is True:
+            print("'''''''")
+            print(node.game_board)
+            print("'''''''")
             return True
     return False
-#     max_d = 7
-#     board = np.array([[1, 1, 1], [0, 0, 1], [0, 1, 1]], np.int32)
-#     print(board)
-#     curr_x = 0
-#     curr_y = 0
-#     stack = [(curr_x, curr_y)]
-#
-#
-#     visitedArray = np.zeros_like(board, dtype=bool)
-#
-#     while stack:
-#         vertex = stack.pop()
-#         visitedArray[vertex] = True
-#         print(visitedArray)
-#         flip(vertex[0], vertex[1], board)
-#         print(board)
-#         if(isGoldenState(board)):
-#             print(board)
 
-
-# def isGoldenState(array):
-#     return np.count_nonzero(array) == 0
 
 
 main()
 
+# TODO Quantify performance difference between visited nodes with node object vs flattened array for report
+# TODO Modify Node object so list of children is a dict that is child node PLUS the index moved to arrive at that board
