@@ -1,5 +1,5 @@
 import numpy as np
-from helpers import build_initial_board, build_boards, Node, is_all_zeros, get_id
+from helpers import build_initial_board, build_boards, Node, is_all_zeros, get_id, find_next_board
 
 
 def main():
@@ -17,7 +17,7 @@ def main():
             #for children in root_node.list_of_children:
                 #print("child:")
                 #print(children.game_board)
-                
+            
 
 
 def start_dfs(node, max_depth):
@@ -46,7 +46,7 @@ def dfs(node, visited_nodes, max_depth):
         for child in children:
             child_board_id = get_id(child.game_board)
             if child_board_id not in visited_nodes:
-                if deep > 3:
+                #if deep > 3:
                     #try different node
                     
                    

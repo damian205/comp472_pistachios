@@ -82,7 +82,47 @@ def flip(xCoordinate, yCoordinate, array):
 def is_all_zeros(array):
     return np.count_nonzero(array) == 0
 
+#return a board which has 0 at the top left corner
+def find_next_board(boards):
+    return find_next_boards(boards, 0)
+
+#return an array of boards where 0 is at the leftmost index
+def find_next_boards(boards, index_offset):
+    #store all boards with 0 in first index from the top left
+    winner_boards = []
+    #initially start with assuming that 0 is at the very end
+    best_index = len(boards[0].game_board.flatten()-1)
+
+    for child in boards:
+        i = index_offset
+        child_board = child.game_board.flatten()
+
+        while i < len(child_board):
+            if child_board[i] == 0:
+                #we found better index. absolute winner, remove the rest
+                if i < best_index:
+                    best_index = i
+                    winner_boards = []
+                    winner_boards.append(child)
+                    break
+                #we have multiple baords with 0 at same spot
+                if i == best_index:
+                    winner_boards.append(child)
+            i+=1
+    #call method recursively with an offset that skips index where we have 0s. We will be able to find next 0
+    if len(winner_boards) > 1:
+        find_next_boards(winner_boards, best_index+1)
+    else:
+        return winner_boards[0]
 
 def get_answer():
     """Get an answer."""
     return True
+
+
+# children = []
+# children.append(Node(np.array([[0,1],[0,0]], np.int32), 0))
+# children.append(Node(np.array([[1,0],[1,1]], np.int32), 0))
+# children.append(Node(np.array([[1,1],[0,1]], np.int32), 0))
+# children.append(Node(np.array([[0,0],[0,1]], np.int32), 0))
+# find_next_board(children)    
