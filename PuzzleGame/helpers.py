@@ -2,14 +2,22 @@ import numpy as np
 import math
 
 
+def get_id(node):
+    str_id = ''
+    for row in node.game_board:
+        for el in row:
+            str_id = str_id + str(el)   
+    return str_id  
+
 # Class the represents a single node in the depth first search. Contains a parent game board plus all possible children
 # after one index has been flipped
 class Node:
-    def __init__(self, game_board, parent_depth):
+    def __init__(self, game_board, parent_depth, parent, clicked_index):
         self.game_board = game_board
         self.list_of_children = []
         self.depth = parent_depth + 1
-        self.str_id = ''
+        self.parent = parent
+        self.clicked_index = clicked_index
 
     def add_child(self, game_board):
         self.list_of_children.append(game_board)
@@ -28,23 +36,37 @@ def build_initial_board(dimension, values):
         board.append(separated_row)
     return board
 
-def get_id(game_board):
-    str_id = ''
-    for row in game_board:
-        for el in row:
-            str_id = str_id + str(el)   
-    return str_id  
 
 # Function that will build all the possible variations of a parent game board after exactly one index has been flipped
 # each board generated is then stored as a child to the parent node that contains the parent board
 def build_boards(parent_node):
     parent_board = parent_node.game_board
     for index, values in np.ndenumerate(parent_board):
+        board_coordinates = turn_indexes_into_board_coordinates(index)
         child_board = parent_board.copy()  # .copy() to make an immutable copy as not to affect the parent board
         flip(index[0], index[1], child_board)
-        child_node = Node(child_board, parent_node.depth)
+        child_node = Node(child_board, parent_node.depth, parent_node, board_coordinates)
         parent_node.add_child(child_node)
-    return parent_node.list_of_children
+
+def turn_indexes_into_board_coordinates(indexes):
+    coordinates =""
+    if indexes[0]==0:
+        coordinates="A"
+    if indexes[0]==1:
+        coordinates="B"
+    if indexes[0]==2:
+        coordinates="C"
+    if indexes[0]==3:
+        coordinates="D"
+    if indexes[1]==0:
+        coordinates=coordinates+"1"
+    if indexes[1]==1:
+        coordinates=coordinates+"2"
+    if indexes[1]==2:
+        coordinates=coordinates+"3"
+    if indexes[1]==3:
+        coordinates=coordinates+"4"     
+    return coordinates
 
 def find_best_board(parent_node):
     best_child = None
@@ -82,24 +104,22 @@ def flip(xCoordinate, yCoordinate, array):
 def is_all_zeros(array):
     return np.count_nonzero(array) == 0
 
+
 def get_answer():
     """Get an answer."""
     return True
 
-# children = []
-# children.append(Node(np.array([[0,1],[0,0]], np.int32), 0))
-# children.append(Node(np.array([[1,0],[1,1]], np.int32), 0))
-# children.append(Node(np.array([[1,1],[0,1]], np.int32), 0))
-# children.append(Node(np.array([[0,0],[0,1]], np.int32), 0))
-# find_next_board(children)    
-
 #return a board which has 0 at the top left corner
 def find_next_board(boards):
-    nextboa = find_next_boards(boards, 0)
-    return nextboa
+    #print("WINNER")
+    no = find_next_boards(boards, 0)
+    #print(no.game_board)
+    return  no
 
 #return an array of boards where 0 is at the leftmost index
 def find_next_boards(boards, index_offset):
+    if len(boards)==0:
+        return None
     #store all boards with 0 in first index from the top left
     winner_boards = []
     #initially start with assuming that 0 is at the very end
@@ -127,3 +147,16 @@ def find_next_boards(boards, index_offset):
         return find_next_boards(winner_boards, best_index+1)
     else:
         return winner_boards[0]
+
+#look at all the children of node and return next child in the priority that was not yet visited
+def get_next_nonvisited_child(node, visited):
+    
+    next_node = find_next_board(node.list_of_children)
+    if next_node is None:
+        return None
+    next_node_as_single_string = get_id(next_node)
+    if next_node_as_single_string in visited:
+        node.list_of_children.remove(next_node)
+        return get_next_nonvisited_child(node, visited)
+    else:
+        return next_node
