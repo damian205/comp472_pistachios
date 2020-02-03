@@ -120,10 +120,12 @@ def find_next_board(boards):
 def find_next_boards(boards, index_offset):
     if len(boards)==0:
         return None
+
     #store all boards with 0 in first index from the top left
     winner_boards = []
     #initially start with assuming that 0 is at the very end
     best_index = len(boards[0].game_board.flatten()-1)
+  
 
     for child in boards:
         i = index_offset
@@ -142,6 +144,9 @@ def find_next_boards(boards, index_offset):
                     winner_boards.append(child)
             i+=1
             
+    #none of the boards have any zeros. return whatever was passed
+    if(len(winner_boards) == 0):
+        return boards[0]        
     #call method recursively with an offset that skips index where we have 0s. We will be able to find next 0
     if len(winner_boards) > 1:
         return find_next_boards(winner_boards, best_index+1)

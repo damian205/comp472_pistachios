@@ -9,11 +9,6 @@ def main():
             root_board = np.array(build_initial_board(int(puzzle_dimension), values), np.int32)
             root_node = Node(root_board, 0, None, "0")
             start_dfs(root_node, max_depth) 
-            # print("".join(str(number) for number in root_node.game_board.flatten()))
-            # build_boards(root_node)
-            # for children in root_node.list_of_children:
-            #     print(children)
-            #     print("''''''''")
 
 
 def start_dfs(node, max_depth):
@@ -21,37 +16,9 @@ def start_dfs(node, max_depth):
     print(dfs(node, visited, int(max_depth)))
 
 
-# def dfs(node, visited_nodes, max_depth):
-#     # print("''''''''")
-#     # print("Node that has been visited")
-#     # print(node.game_board)
-#     # print("''''''''")
-#     # board_as_single_string = "".join(str(number) for number in node.game_board.flatten())
-#     if node in visited_nodes:
-#         return False
-#     visited_nodes.append(node)
-#     # print(visited_nodes)
-#     if is_all_zeros(node.game_board):
-#         print('Winner')
-#         print("'''''''")
-#         print(node.game_board)
-#         print("'''''''")
-#         return True
-#     if node.depth == max_depth:
-#         return False
-#     build_boards(node)
-#     for child in node.list_of_children:
-#         if dfs(child, visited_nodes, max_depth) is True:
-#             print("'''''''")
-#             print(node.game_board) 
-#             print("'''''''")
-#             return True
-#     return False
-
-
 def dfs(node, visited_nodes, max_depth):
-    #print("---")
-    #print(node.game_board)
+    print("---")
+    print(node.game_board)
     #print("depth")
     #print(node.depth)
     node_id = get_id(node)
@@ -73,13 +40,19 @@ def dfs(node, visited_nodes, max_depth):
         print(node.game_board)
         return True
     if node.depth == max_depth:
-        root_node = node
-        while root_node.parent is not None:
-            root_node = root_node.parent
-        next_node = get_next_nonvisited_child(root_node, visited_nodes)
-        if next_node is None:
-            return False
-        return dfs(next_node, visited_nodes, max_depth)
+        #loop until we hit parent (in case where all children were visited)
+        while node is not None:
+            node = node.parent
+            #cant find non-visited child anywhere, exist
+            if node is None:
+                return False
+            #get next non-visited child of parent    
+            next_node = get_next_nonvisited_child(node, visited_nodes)
+            if next_node is not None:
+                return dfs(next_node, visited_nodes, max_depth)
+          
+        return False
+
     build_boards(node)
     next_node = get_next_nonvisited_child(node, visited_nodes)
     if next_node is None:
