@@ -1,5 +1,9 @@
 import numpy as np
 import math
+from string import ascii_uppercase
+
+
+INDICES_BOARD = None  # Variable that will contain 2D numpy array corresponding to indices of game board
 
 
 # Class the represents a single node in the depth first search. Contains a parent game board plus all possible children
@@ -7,17 +11,31 @@ import math
 class Node:
     def __init__(self, game_board, parent_depth):
         self.game_board = game_board
-        self.list_of_children = []
+        self.list_of_children = {}
         self.depth = parent_depth + 1
 
-    def add_child(self, game_board):
-        self.list_of_children.append(game_board)
+    def add_child(self, index_coordinates, child_node):
+        index_flipped = INDICES_BOARD[index_coordinates[0]][index_coordinates[1]]
+        entry = {index_flipped: child_node}
+        self.list_of_children.update(entry)  # append(game_board)
+
+
+# Function that builds a board of indices modeled on the structure of the input board. This board of indices is used
+# to show what index has been flipped to produce its corresponding child board.
+def build_indices_board(game_board_dimension):
+    dimensions = range(1, game_board_dimension + 1)
+    list_of_indices = []
+    for one_dimension in dimensions:
+        list_of_indices.append([ascii_uppercase[one_dimension - 1] + f'{i}' for i in range(1, game_board_dimension+1)])
+    global INDICES_BOARD
+    INDICES_BOARD = np.array(list_of_indices, dtype=np.str)
 
 
 # Function that receives concatenated board values from input file and returns a 2d dimensional array based on the
 # given dimensions of the board
-def build_initial_board(dimension, values):
-    split_values = [values[start:start+dimension] for start in range(0, len(values), dimension)]
+def build_initial_board(game_board_dimension, values):
+    build_indices_board(game_board_dimension)
+    split_values = [values[start:start + game_board_dimension] for start in range(0, len(values), game_board_dimension)]
     board = []
     # TODO Replace this with list comprehension or lambda expression, Compare performance after those changes made
     for concatenated_row in split_values:
@@ -36,7 +54,7 @@ def build_boards(parent_node):
         child_board = parent_board.copy()  # .copy() to make an immutable copy as not to affect the parent board
         flip(index[0], index[1], child_board)
         child_node = Node(child_board, parent_node.depth)
-        parent_node.add_child(child_node)
+        parent_node.add_child(index, child_node)
 
 
 def find_best_board(parent_node):
