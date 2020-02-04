@@ -68,8 +68,11 @@ def find_best_board(parent_node):
     return best_child
 
 
-def find_solution(board, max_depth):
-    pass
+def save_to_file(list_of_moves, file_name):
+    with open(file_name, 'w') as file:
+        for a_move in list_of_moves:
+            file.write(a_move + "\n")
+        file.close()
 
 
 def flip(xCoordinate, yCoordinate, array):
@@ -92,8 +95,3 @@ def flip(xCoordinate, yCoordinate, array):
 
 def is_all_zeros(array):
     return np.count_nonzero(array) == 0
-
-
-def get_answer():
-    """Get an answer."""
-    return True
