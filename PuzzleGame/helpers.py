@@ -9,15 +9,16 @@ INDICES_BOARD = None  # Variable that will contain 2D numpy array corresponding 
 # Class the represents a single node in the depth first search. Contains a parent game board plus all possible children
 # after one index has been flipped
 class Node:
-    def __init__(self, game_board, parent_depth):
+    def __init__(self, game_board, parent_depth, index):
         self.game_board = game_board
-        self.list_of_children = {}
+        self.list_of_children = []
         self.depth = parent_depth + 1
+        self.index = index
 
-    def add_child(self, index_coordinates, child_node):
-        index_flipped = INDICES_BOARD[index_coordinates[0]][index_coordinates[1]]
-        entry = {index_flipped: child_node}
-        self.list_of_children.update(entry)  # append(game_board)
+    def add_child(self, child_node):
+        # index_flipped = INDICES_BOARD[index_coordinates[0]][index_coordinates[1]]
+        # entry = {index_flipped: child_node}
+        self.list_of_children.append(child_node)  # append(game_board)
 
 
 # Function that builds a board of indices modeled on the structure of the input board. This board of indices is used
@@ -53,15 +54,16 @@ def build_boards(parent_node):
     for index, values in np.ndenumerate(parent_board):
         child_board = parent_board.copy()  # .copy() to make an immutable copy as not to affect the parent board
         flip(index[0], index[1], child_board)
-        child_node = Node(child_board, parent_node.depth)
-        parent_node.add_child(index, child_node)
+        index_flipped = INDICES_BOARD[index[0]][index[1]]
+        child_node = Node(child_board, parent_node.depth, index_flipped)
+        parent_node.add_child(child_node)
 
 
 def find_best_board(parent_node):
     best_child = None
     smallest = math.inf
     for child in parent_node.list_of_children:
-        first_zero_index = np.where(child == 0)[0][0]
+        first_zero_index = np.where(child.game_board == 0)[0][0]
         if first_zero_index < smallest:
             smallest = first_zero_index
             best_child = child

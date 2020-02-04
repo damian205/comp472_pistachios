@@ -1,5 +1,6 @@
 import numpy as np
 from helpers import build_initial_board, build_boards, Node, is_all_zeros, save_to_file
+from queue import PriorityQueue
 
 list_of_solution_moves = []  # Must be reset after every input puzzle
 list_of_search_moves = []  # Ditto
@@ -11,7 +12,7 @@ def main():
         for line in input_file.readlines():
             puzzle_dimension, max_depth, max_search_path, values = line.split()
             root_board = np.array(build_initial_board(int(puzzle_dimension), values), np.int32)
-            root_node = Node(root_board, 0)
+            root_node = Node(root_board, 0, 0)
             build_boards(root_node)
             start_dfs(root_node, max_depth)
             save_to_file(list_of_solution_moves, f'{i}_dfs_solution.txt')
@@ -47,12 +48,12 @@ def dfs(node, visited_nodes, max_depth):
     if node.depth == max_depth:
         return False
     build_boards(node)
-    for index, child in node.list_of_children.items():
+    for child in node.list_of_children:
         child_board_as_single_string = "".join(str(number) for number in child.game_board.flatten())
-        list_of_search_moves.append(f'{index} {child_board_as_single_string}')
+        list_of_search_moves.append(f'{child.index} {child_board_as_single_string}')
         if dfs(child, visited_nodes, max_depth) is True:
             global list_of_solution_moves
-            list_of_solution_moves.append(f'{index} {child_board_as_single_string}')
+            list_of_solution_moves.append(f'{child.index} {child_board_as_single_string}')
             return True
     return False
 
