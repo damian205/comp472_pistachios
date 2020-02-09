@@ -1,13 +1,11 @@
 import numpy as np
-from helpers import build_initial_board, build_boards, Node, is_all_zeros, save_to_file
+from helpers import build_initial_board, build_boards, Node, Slow_Node, is_all_zeros, save_to_file, get_next_nonvisited_child, get_id, slow_build_boards
 
 list_of_solution_moves = []  # Must be reset after every input puzzle
 list_of_search_moves = []  # Ditto
-# test_list_of_priorities = []
-
 
 def main():
-    with open('one_input') as input_file:
+    with open('PuzzleGame\one_input') as input_file:
         i = 0
         for line in input_file.readlines():
             puzzle_dimension, max_depth, max_search_path, values = line.split()
@@ -20,6 +18,20 @@ def main():
             i += 1
             clean_up()
 
+    #other solution for DFS that is 50% slower than above
+    # with open('PuzzleGame\one_input') as input_file:    
+    #     i = 0
+    #     for line in input_file.readlines():
+    #         puzzle_dimension, max_depth, max_search_path, values = line.split()
+    #         root_board = np.array(build_initial_board(int(puzzle_dimension), values), np.int32)
+    #         root_node = Slow_Node(root_board, 0, None, "0")
+    #         start_slow_dfs(root_node, max_depth)
+    #         save_to_file(list_of_solution_moves, f'{i}_slow_dfs_solution.txt')
+    #         save_to_file(list_of_search_moves, f'{i}_slow_dfs_search.txt')
+    #         i += 1
+    #         clean_up()
+            
+
 
 def start_dfs(node, max_depth):
     visited = []
@@ -30,11 +42,6 @@ def start_dfs(node, max_depth):
         list_of_solution_moves.reverse()
     else:
         list_of_solution_moves.append('No Solution')
-    # sort_experiment(test_list_of_priorities)
-
-
-# TODO after putting board_as_single_string within [], the algorithm detects same strings correctly BUT becomes
-# less capable of finding solutions as when there were no []... WHY??!!
 
 
 def dfs(node, visited_nodes, max_depth):
@@ -52,8 +59,6 @@ def dfs(node, visited_nodes, max_depth):
     for child in node.list_of_children:
         child_board_as_single_string = "".join(str(number) for number in child.game_board.flatten())
         list_of_search_moves.append(f'{child.index} {child_board_as_single_string}')
-        # global test_list_of_priorities
-        # test_list_of_priorities.append(child)
         if dfs(child, visited_nodes, max_depth) is True:
             global list_of_solution_moves
             list_of_solution_moves.append(f'{child.index} {child_board_as_single_string}')
@@ -66,18 +71,52 @@ def clean_up():
     list_of_search_moves.clear()
 
 
-# def sort_experiment(list_of_stuff):
-#     for i in range(0, len(list_of_stuff) - 1):
-#         print(list_of_stuff[i].priority)
-#     print('''''''')
-#     print('''''''')
-#     print('''''''')
-#     print('''''''')
-#     list_of_stuff.sort()
-#     for i in range(0, len(list_of_stuff) - 1):
-#         print(list_of_stuff[i].priority)
+######################################################################################################
+#another approach to DFS algorithm starts here. This is not part of final solution but an experiment. 
+#Run this code by uncommenting test block in main method
+######################################################################################################
 
+def start_slow_dfs(node, max_depth):
+    visited = []
+    if slow_dfs(node, visited, int(max_depth)):
+        list_of_solution_moves.append(f'{0}  {get_id(node)}')
+        list_of_solution_moves.reverse()
+    else:
+        list_of_solution_moves.append('No Solution')
+
+
+def slow_dfs(node, visited_nodes, max_depth):
+    node_id = get_id(node)
+    list_of_search_moves.append(f'{node.clicked_index} {node_id}')
+
+    if node_id in visited_nodes:
+        return False
+    visited_nodes.append(node_id)
+    if is_all_zeros(node.game_board):
+        while node.parent is not None:
+            list_of_solution_moves.append(f'{node.clicked_index} {get_id(node)}')
+            node = node.parent
+        return True
+    if node.depth == max_depth:
+        #loop until we hit parent (in case where all children were visited)
+        while node is not None:
+            node = node.parent
+            #cant find non-visited child anywhere, exist
+            if node is None:
+                return False
+            #get next non-visited child of parent    
+            next_node = get_next_nonvisited_child(node, visited_nodes)
+            if next_node is not None:
+                return slow_dfs(next_node, visited_nodes, max_depth)
+          
+        return False
+
+    slow_build_boards(node)
+    next_node = get_next_nonvisited_child(node, visited_nodes)
+    if next_node is None:
+        return False
+    if slow_dfs(next_node, visited_nodes, max_depth):
+        return True
+    return False
 
 main()
-
-# TODO Quantify performance difference between visited nodes with node object vs flattened array for report
