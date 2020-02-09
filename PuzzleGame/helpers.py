@@ -1,46 +1,8 @@
 import numpy as np
 from string import ascii_uppercase
-
+from node import *
 
 INDICES_BOARD = None  # Variable that will contain 2D numpy array corresponding to indices of game board
-
-
-# Class the represents a single node in the depth first search. Contains a parent game board plus all possible children
-# after one index has been flipped
-class Node:
-    def __init__(self, game_board, parent_depth, index, priority):
-        self.game_board = game_board
-        self.list_of_children = []
-        self.depth = parent_depth + 1
-        self.index = index
-        self.priority = priority
-
-    def __eq__(self, other):
-        for self_index, other_index in zip(self.priority.split(','), other.priority.split(',')):
-            if int(self_index) < int(other_index):
-                return False
-            elif int(self_index) > int(other_index):
-                return False
-        return True
-
-    def __lt__(self, other):
-        for self_index, other_index in zip(self.priority.split(','), other.priority.split(',')):
-            if int(self_index) < int(other_index):
-                return True
-            elif int(self_index) > int(other_index):
-                return False
-        return False
-
-    def __gt__(self, other):
-        for self_index, other_index in zip(self.priority.split(','), other.priority.split(',')):
-            if int(self_index) > int(other_index):
-                return True
-            elif int(self_index) < int(other_index):
-                return False
-        return False
-
-    def add_child(self, child_node):
-        self.list_of_children.append(child_node)  # append(game_board)
 
 
 # Function that builds a board of indices modeled on the structure of the input board. This board of indices is used
@@ -73,23 +35,28 @@ def build_initial_board(game_board_dimension, values):
 # below function
 # Function that will build all the possible variations of a parent game board after exactly one index has been flipped
 # each board generated is then stored as a child to the parent node that contains the parent board
-def build_boards(parent_node):
+def build_boards(parent_node, search_type):
     parent_board = parent_node.game_board
     for index, values in np.ndenumerate(parent_board):
         child_board = parent_board.copy()  # .copy() to make an immutable copy as not to affect the parent board
         flip(index[0], index[1], child_board)
         index_flipped = INDICES_BOARD[index[0]][index[1]]
-        child_priority = find_priority(child_board, parent_board.shape[0])
-        child_node = Node(child_board, parent_node.depth, index_flipped, child_priority)
+        if search_type == "DFS":
+            child_priority = find_priority_by_first_zero(child_board, parent_board.shape[0])
+            child_node = DfsNode(child_board, parent_node.depth, index_flipped, child_priority)
+        elif search_type == "A*":
+            child_priority = (parent_node.depth + 1) + find_priority_by_nb_of_ones(child_board)  # i.e. g(n) + h(n)
+            child_node = AStarNode(child_board, parent_node.depth, index_flipped, child_priority)
+        else:  # i.e. BEST-FIRST
+            pass
         parent_node.add_child(child_node)
-    parent_node.list_of_children.sort()
 
 
 # Function that assigns a priority to each game board variation. The priority is represented by a comma-separated
 # string whereby each element in the string represents the index in which a "0" value is found. If no "0" value is
 # found, then the priority value assigned is the maximum possible index in the game board plus one to make sure this
 # board is the least prioritized.
-def find_priority(game_board, game_board_dimension):
+def find_priority_by_first_zero(game_board, game_board_dimension):
     lowest_priority_plus_one = game_board_dimension * game_board_dimension + 1
     game_board_as_string = game_board.flatten()
     index_of_all_zeros = ",".join(str(number) for number in np.where(game_board_as_string == 0)[0])
@@ -99,6 +66,16 @@ def find_priority(game_board, game_board_dimension):
         return index_of_all_zeros
     index_of_all_zeros = index_of_all_zeros + f',{lowest_priority_plus_one}'
     return index_of_all_zeros
+
+
+# Function that assigns a priority based on a heuristic that prioritizes a smaller number of 1s on a game_board
+def find_priority_by_nb_of_ones(game_board):
+    game_board_as_string = game_board.flatten()
+    index_of_all_ones = np.where(game_board_as_string == 1)[0]
+    if len(index_of_all_ones) == 0:
+        return 0
+    nb_of_ones = index_of_all_ones.shape[0]
+    return nb_of_ones
 
 
 # Function that saves the passed list of moves to a file with the name matching the parameter "file_name"
