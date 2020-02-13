@@ -3,16 +3,23 @@
 # Class the represents a single node in the depth first search. Contains a parent game board plus all possible children
 # after one index has been flipped
 class Node:
-    def __init__(self, game_board, parent_depth, index, priority, history=None):
+    def __init__(self, game_board, parent_depth, index, priority):
         self.game_board = game_board
         self.list_of_children = []
         self.depth = parent_depth + 1
         self.index = index
         self.priority = priority
-        # self.history = history
+        self.history = {f'{self.index}': f'{"".join(str(number) for number in game_board.flatten())}'}
 
     def add_child(self, child_node):
+        child_node.history.update(self.history)
         self.list_of_children.append(child_node)  # append(game_board)
+
+    def print_history(self):
+        node_history = []
+        for kv_pair in self.history.items():
+            node_history.append(f'{kv_pair[0]} {kv_pair[1]}')
+        return node_history
 
 
 # Class that represents a DFS node. A DFS Node is a child of the Node class. Its priority is represented by a string

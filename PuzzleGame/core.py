@@ -76,7 +76,11 @@ def start_a_star(node, max_search, i):
     node.__class__ = AStarNode
     global list_of_nodes_a_star, list_of_solution_moves, list_of_search_moves
     list_of_nodes_a_star.append(node)
-    a_star([], int(max_search))
+    goal_node = a_star([], int(max_search))
+    if goal_node is None:
+        list_of_solution_moves.append('No Solution')
+    else:
+        list_of_solution_moves = goal_node.print_history()
     list_of_solution_moves.reverse()
     save_to_file(list_of_solution_moves, f'{i}_A_solution.txt')
     save_to_file(list_of_search_moves, f'{i}_A_search.txt')
@@ -86,27 +90,45 @@ def start_a_star(node, max_search, i):
 
 def a_star(visited_nodes, max_search):
     global list_of_nodes_a_star, list_of_search_moves, list_of_solution_moves
-    if len(list_of_nodes_a_star) == 0:
-        return False
-    if len(list_of_search_moves) >= max_search:
-        return False
-    current_best_node = list_of_nodes_a_star.pop(0)
-    board_as_single_string = "".join(str(number) for number in current_best_node.game_board.flatten())
-    list_of_search_moves.append(f'{current_best_node.index} {board_as_single_string}')
-    # check to see if board of the same values has been visited before
-    if len(set([board_as_single_string]).intersection(set(visited_nodes))) != 0:
-        return False
-    visited_nodes.append(board_as_single_string)
-    if is_all_zeros(current_best_node.game_board):
-        list_of_solution_moves.append(f'{current_best_node.index} {board_as_single_string}')
-        return True
-    build_boards(current_best_node, "A*")
-    for child in current_best_node.list_of_children:
-        list_of_nodes_a_star.append(child)
-    list_of_nodes_a_star.sort()
-    if a_star(visited_nodes, max_search):
-        list_of_solution_moves.append(f'{current_best_node.index} {board_as_single_string}')
-        return True
+    while len(list_of_nodes_a_star) > 0 and len(list_of_search_moves) <= max_search:
+        current_best_node = list_of_nodes_a_star.pop(0)
+        board_as_single_string = "".join(str(number) for number in current_best_node.game_board.flatten())
+        list_of_search_moves.append(f'{current_best_node.index} {board_as_single_string}')
+        # check to see if board of the same values has been visited before
+        if len(set([board_as_single_string]).intersection(set(visited_nodes))) != 0:
+            continue
+        visited_nodes.append(board_as_single_string)
+        if is_all_zeros(current_best_node.game_board):
+            # list_of_solution_moves.append(f'{current_best_node.index} {board_as_single_string}')
+            return current_best_node
+        build_boards(current_best_node, "A*")
+        for child in current_best_node.list_of_children:
+            list_of_nodes_a_star.append(child)
+        list_of_nodes_a_star.sort()
+    return None
+
+    # if len(list_of_nodes_a_star) == 0:
+    #     return False
+    # if len(list_of_search_moves) >= max_search:
+    #     return False
+    # current_best_node = list_of_nodes_a_star.pop(0)
+    # board_as_single_string = "".join(str(number) for number in current_best_node.game_board.flatten())
+    # list_of_search_moves.append(f'{current_best_node.index} {board_as_single_string}')
+    # # check to see if board of the same values has been visited before
+    # if len(set([board_as_single_string]).intersection(set(visited_nodes))) != 0:
+    #     return False
+    # visited_nodes.append(board_as_single_string)
+    # if is_all_zeros(current_best_node.game_board):
+    #     list_of_solution_moves.append(f'{current_best_node.index} {board_as_single_string}')
+    #     return True
+    # build_boards(current_best_node, "A*")
+    # for child in current_best_node.list_of_children:
+    #     list_of_nodes_a_star.append(child)
+    # list_of_nodes_a_star.sort()
+    # if a_star(visited_nodes, max_search):
+    #     list_of_solution_moves.append(f'{current_best_node.index} {board_as_single_string}')
+    #     return True
+    # return False
 
 
 def clean_up():
