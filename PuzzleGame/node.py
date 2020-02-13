@@ -1,3 +1,4 @@
+# TODO history doesn't need to be a dict, change to list to reduce complexity
 
 
 # Class the represents a single node in the depth first search. Contains a parent game board plus all possible children
