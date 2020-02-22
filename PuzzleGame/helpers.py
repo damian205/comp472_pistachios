@@ -46,9 +46,10 @@ def build_boards(parent_node, search_type):
             child_node = DfsNode(child_board, parent_node.depth, index_flipped, child_priority)
         elif search_type == "A*":
             child_priority = (parent_node.depth + 1) + find_priority_by_nb_of_ones(child_board)  # i.e. g(n) + h(n)
-            child_node = AStarNode(child_board, parent_node.depth, index_flipped, child_priority)
-        else:  # i.e. BEST-FIRST
-            pass
+            child_node = HeuristicNode(child_board, parent_node.depth, index_flipped, child_priority)
+        elif search_type == "BFS":
+            child_priority = find_priority_by_clusters_of_ones(child_board) #i.e. h(n) 
+            child_node =  HeuristicNode(child_board, parent_node.depth, index_flipped, child_priority)
         parent_node.add_child(child_node)
 
 
@@ -75,8 +76,55 @@ def find_priority_by_nb_of_ones(game_board):
     if len(index_of_all_ones) == 0:
         return 0
     nb_of_ones = index_of_all_ones.shape[0]
-    return nb_of_ones
+    return nb_of_ones     
 
+# Function that assigns a priority based on a heuristic that:
+# Prioritizes boards with smaller number of 1s and larger clusters of 1s together
+def find_priority_by_clusters_of_ones(game_board):
+
+    adjusted_nb_of_ones = find_priority_by_nb_of_ones(game_board)
+    for i in range(len(game_board)):
+        for j in range(len(game_board[i])):
+            ones = count_hypothetical_flip(i, j, game_board)
+            #when 1s are clustered together, next more will bring us closer to the solution
+            if ones == 5 or ones == 4 or ones == 3:
+                adjusted_nb_of_ones = adjusted_nb_of_ones -1
+
+    return adjusted_nb_of_ones  
+
+# Check how many lights would go off if given move was made. 
+def count_hypothetical_flip(xCoordinate, yCoordinate, array):
+
+    ones = 0
+    if array[xCoordinate, yCoordinate] == 1:
+        ones = ones + 1
+    
+    # check horizontal neigbours
+    if yCoordinate != 0:
+        if array[xCoordinate, yCoordinate-1] == 1:
+            ones = ones + 1
+        else:
+            ones = ones - 1
+    
+    if len(array[xCoordinate])-1 != yCoordinate:
+        if array[xCoordinate, yCoordinate+1] == 1:
+            ones = ones + 1
+        else:
+            ones = ones - 1
+    # check vertical neigbours
+    if xCoordinate != 0:
+        if array[xCoordinate-1, yCoordinate] == 1:
+            ones = ones + 1
+        else:
+            ones = ones - 1        
+
+    if len(array[yCoordinate])-1 != xCoordinate:
+        if array[xCoordinate+1, yCoordinate] == 1:
+            ones = ones + 1
+        else:
+            ones = ones - 1
+  
+    return ones
 
 # Function that saves the passed list of moves to a file with the name matching the parameter "file_name"
 def save_to_file(list_of_moves, file_name):
@@ -103,7 +151,6 @@ def flip(xCoordinate, yCoordinate, array):
         array[xCoordinate-1, yCoordinate] = 1 - array[xCoordinate-1, yCoordinate]
     if len(array[yCoordinate])-1 != xCoordinate:
         array[xCoordinate+1, yCoordinate] = 1 - array[xCoordinate+1, yCoordinate]
-
 
 # Function that determines whether the game board examined is the goal state(i.e. all elements in array are 0)
 def is_all_zeros(array):

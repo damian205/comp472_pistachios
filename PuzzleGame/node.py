@@ -51,11 +51,9 @@ class DfsNode(Node):
                 return False
         return False
 
-
-# Class that represents an a star node. an a star node is a child of the Node class. Its only difference is that its
-# priority is defined by a two components. A g(n) that represents the cost of reaching this node (in this case, this is
-# the node's depth) and a heuristic function h(n) that represents the node's distance from the goal node)
-class AStarNode(Node):
+# Class that represents a node for Heuristic search. HeuristicNode node is a child of the Node class. Its only difference is that its
+# priority is defined by heuristic function h(n) that represents the node's distance from the goal node
+class HeuristicNode(Node):
 
     def __eq__(self, other):
         return self.priority == other.priority

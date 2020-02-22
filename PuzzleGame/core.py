@@ -2,9 +2,10 @@ import numpy as np
 from helpers import build_initial_board, build_boards, is_all_zeros, save_to_file
 from node import *
 
-list_of_solution_moves = []  # Must be reset after every input puzzle
-list_of_search_moves = []  # Ditto
-list_of_nodes_a_star = []  # List used for the a star algorithm
+list_of_solution_moves  = []  # Must be reset after every input puzzle
+list_of_search_moves    = []  # Ditto
+list_of_nodes_a_star    = []  # List used for the a star algorithm
+list_of_nodes_bfs       = []  # List used for the bfs algorithm
 
 # TODO provide a copy() function for the Node class that will maintain all values but just clear the existing list of
 # children
@@ -20,6 +21,8 @@ def main():
             start_dfs(root_node, max_depth, i)
             root_node = Node(root_board, 0, 0, 0)  # reinitialize to remove preexisting list of children
             start_a_star(root_node, max_search_path, i)
+            root_node = Node(root_board, 0, 0, 0)
+            start_bfs(root_node, max_search_path, i)
             i += 1
 
 
@@ -65,7 +68,7 @@ def dfs(node, visited_nodes, max_depth):
 
 
 def start_a_star(node, max_search, i):
-    node.__class__ = AStarNode
+    node.__class__ = HeuristicNode
     global list_of_nodes_a_star, list_of_solution_moves, list_of_search_moves
     list_of_nodes_a_star.append(node)
     goal_node = a_star([], int(max_search))
@@ -98,12 +101,46 @@ def a_star(visited_nodes, max_search):
         list_of_nodes_a_star.sort()
     return None
 
+def start_bfs(node, max_search, i):
+    node.__class__ = HeuristicNode
+    global list_of_nodes_bfs, list_of_solution_moves, list_of_search_moves
+    list_of_nodes_bfs.append(node)
+    goal_node = bfs([], int(max_search))
+    if goal_node is None:
+        list_of_solution_moves.append('No Solution')
+    else:
+        list_of_solution_moves = goal_node.print_history()
+    list_of_solution_moves.reverse()
+    save_to_file(list_of_solution_moves, f'{i}_BFS_solution.txt')
+    save_to_file(list_of_search_moves, f'{i}_BFS_search.txt')
+    clean_up()
+
+def bfs(visited_nodes, max_search):
+    
+    global list_of_nodes_bfs, list_of_search_moves, list_of_solution_moves
+    while len(list_of_nodes_bfs) > 0 and len(list_of_search_moves) <= max_search:
+       
+        current_best_node = list_of_nodes_bfs.pop(0)
+        board_as_single_string = "".join(str(number) for number in current_best_node.game_board.flatten())
+        list_of_search_moves.append(f'{current_best_node.index} {board_as_single_string}')
+ 
+        if len(set([board_as_single_string]).intersection(set(visited_nodes))) != 0:
+            continue
+        visited_nodes.append(board_as_single_string)
+        if is_all_zeros(current_best_node.game_board):
+            return current_best_node
+        build_boards(current_best_node, "BFS")
+        
+        for child in current_best_node.list_of_children:
+            list_of_nodes_bfs.append(child)
+        list_of_nodes_bfs.sort()
+    return None
 
 def clean_up():
     list_of_solution_moves.clear()
     list_of_search_moves.clear()
     list_of_nodes_a_star.clear()
-
+    list_of_nodes_bfs.clear()
 
 main()
 
