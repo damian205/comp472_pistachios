@@ -50,20 +50,9 @@ def build_boards(parent_node, search_type):
         elif search_type == "BFS":
             child_priority = find_priority_by_clusters_of_ones(child_board) #i.e. h(n) 
             child_node =  HeuristicNode(child_board, parent_node.depth, index_flipped, child_priority)
-        elif search_type =="CUSTOM":
-            child_priority = reduction_matrix_to_nb_of_ones(child_board)
-            child_node =  HeuristicNode(child_board, parent_node.depth, index_flipped, child_priority)
-        
         parent_node.add_child(child_node)
 
-#Function that assigns priority to the matrix that has the smallest hamming distance
-def reduction_matrix_to_nb_of_ones(game_board):
-    game_board_as_string = game_board.flatten()
-    index_of_all_ones = np.where(game_board_as_string == 1)[0]
-    if len(index_of_all_ones) == 0:
-        return 0
-    nb_of_ones = index_of_all_ones.shape[0] % dimensions
-    return nb_of_ones     
+
 # Function that assigns a priority to each game board variation. The priority is represented by a comma-separated
 # string whereby each element in the string represents the index in which a "0" value is found. If no "0" value is
 # found, then the priority value assigned is the maximum possible index in the game board plus one to make sure this
