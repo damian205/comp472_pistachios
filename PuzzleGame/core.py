@@ -12,7 +12,7 @@ list_of_nodes_bfs       = []  # List used for the bfs algorithm
 
 
 def main():
-    with open('one_input') as input_file:
+    with open('example_input') as input_file:
         i = 0
         for line in input_file.readlines():
             puzzle_dimension, max_depth, max_search_path, values = line.split()
@@ -31,7 +31,7 @@ def start_dfs(node, max_depth, i):
     build_boards(node, "DFS")
     visited = []
     starting_board_as_single_string = "".join(str(number) for number in node.game_board.flatten())
-    list_of_search_moves.append(f'0  {starting_board_as_single_string}')
+    list_of_search_moves.append(f'0 0 0 0 {starting_board_as_single_string}')
     if not dfs(node, visited, int(max_depth)):
         list_of_solution_moves.append('No Solution')
     save_to_file(list_of_solution_moves, f'{i}_dfs_solution.txt')
@@ -61,7 +61,7 @@ def dfs(node, visited_nodes, max_depth):
     node.list_of_children.sort()
     for child in node.list_of_children:
         child_board_as_single_string = "".join(str(number) for number in child.game_board.flatten())
-        list_of_search_moves.append(f'{child.index} {child_board_as_single_string}')
+        list_of_search_moves.append(f'{child.index} 0 0 0 {child_board_as_single_string}')
         if dfs(child, visited_nodes, max_depth):
             return True
     return False
@@ -87,7 +87,8 @@ def a_star(visited_nodes, max_search):
     while len(list_of_nodes_a_star) > 0 and len(list_of_search_moves) <= max_search:
         current_best_node = list_of_nodes_a_star.pop(0)
         board_as_single_string = "".join(str(number) for number in current_best_node.game_board.flatten())
-        list_of_search_moves.append(f'{current_best_node.index} {board_as_single_string}')
+        list_of_search_moves.append(f'{current_best_node.index} {current_best_node.depth + current_best_node.priority}'
+                                    f' {current_best_node.depth} {current_best_node.priority} {board_as_single_string}')
         # check to see if board of the same values has been visited before
         if len(set([board_as_single_string]).intersection(set(visited_nodes))) != 0:
             continue
@@ -100,6 +101,7 @@ def a_star(visited_nodes, max_search):
             list_of_nodes_a_star.append(child)
         list_of_nodes_a_star.sort()
     return None
+
 
 def start_bfs(node, max_search, i):
     node.__class__ = HeuristicNode
@@ -115,6 +117,7 @@ def start_bfs(node, max_search, i):
     save_to_file(list_of_search_moves, f'{i}_BFS_search.txt')
     clean_up()
 
+
 def bfs(visited_nodes, max_search):
     
     global list_of_nodes_bfs, list_of_search_moves, list_of_solution_moves
@@ -122,7 +125,8 @@ def bfs(visited_nodes, max_search):
        
         current_best_node = list_of_nodes_bfs.pop(0)
         board_as_single_string = "".join(str(number) for number in current_best_node.game_board.flatten())
-        list_of_search_moves.append(f'{current_best_node.index} {board_as_single_string}')
+        list_of_search_moves.append(f'{current_best_node.index} {current_best_node.priority} 0 {current_best_node.priority}'
+                                    f' {board_as_single_string}')
  
         if len(set([board_as_single_string]).intersection(set(visited_nodes))) != 0:
             continue
