@@ -12,7 +12,7 @@ list_of_nodes_bfs       = []  # List used for the bfs algorithm
 
 
 def main():
-    with open('example_input') as input_file:
+    with open('PuzzleGame\example_input') as input_file:
         i = 0
         for line in input_file.readlines():
             puzzle_dimension, max_depth, max_search_path, values = line.split()
